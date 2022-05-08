@@ -99,6 +99,17 @@ typedef struct _Element_803F9628_Obj_14 {
   s32 unk1C;
 } Element_803F9628_Obj_14;
 
+typedef struct _Element_803F9628_flags {
+  u8 unk80: 1;
+  u8 unk40: 1;
+  u8 unk20: 1;
+  u8 unk10: 1;
+  u8 unk08: 1;
+  u8 unk04: 1;
+  u8 unk02: 1;
+  u8 unk01: 1;
+} Element_803F9628_flags;
+
 typedef struct _Element_803F9628 {
     // 0x00
     // maybe?
@@ -106,19 +117,25 @@ typedef struct _Element_803F9628 {
     // 0x04
     u32 unk4;
     // 0x08
-    void* unk8;
+    void (*unk8)(HSD_GObj*);
     // 0x0C
     // flags?
     u32 unkC;
     // 0x10
     // flags?
-    u32 unk10;
+    u8 unk10;
+    // 0x11
+    u8 unk11;
+    // 0x12
+    Element_803F9628_flags unk12;
+    // 0x13
+    u8 unk13;
     // 0x14
-    s32 unk14;
+    HSD_Joint* unk14;
     // 0x18
-    u32 unk18;
+    void (*unk18)(s32);
     // 0x1C
-    u32 unk1C;
+    void (*unk1C)(s32);
     // 0x20
     u32 unk20;
     // 0x24
@@ -188,6 +205,13 @@ typedef struct _Placeholder_8016AE50_ret_val {
     Placeholder_8016AE50_flags flags;
 } Placeholder_8016AE50_ret_val;
 
+typedef struct _Thing_802F66A4_spc {
+    void* unk0;
+    void* unk4;
+    void* unk8;
+    void* unkC;
+} Thing_802F66A4_spc;
+
 // external functions we need
 // takes HSD obj* ?
 //extern void func_80391CAC(void*);
@@ -200,6 +224,17 @@ extern void func_802F7AF8(s32);
 extern void func_802F7D08(s32);
 extern void func_802F7BB4(s32);
 extern void func_802FB650(s32);
+extern void func_8000C0E8(HSD_JObj*, s32, HSD_Joint**);
+extern void func_80011C18(HSD_JObj*, s32);
+extern void func_80391070(HSD_GObj*, s32);
+
+extern s32* func_8000C160(HudIndex*, s32);
+extern void func_80016AF0(s32, Thing_802F66A4_spc***, char*, Thing_802F66A4_spc***, char*, ...);
+extern s32* func_802F3690();
+
+// globals defined outside this file that we need to reference
+extern u8 lbl_804D7849;
+
 
 // functions defined in this file
 
@@ -214,7 +249,7 @@ HSD_GObj* func_802F6194(HSD_GObj*, s32);
 asm void /*?*/ func_802F61FC(void /*?*/);
 asm void func_802F6508(s32);
 void func_802F665C(s8);
-asm void /*?*/ func_802F66A4(void /*?*/);
+void func_802F66A4(void);
 void func_802F6788(s32);
 void func_802F6804(void);
 void func_802F6898(void);
@@ -226,7 +261,7 @@ void func_802F6C04(s32);
 void func_802F6D10(s32);
 void func_802F6E1C(void);
 void func_802F6E3C(s32);
-asm void /*?*/ func_802F6EA4(void /*?*/);
+void func_802F6EA4(s32 arg0, s32 arg1, u32 arg2, s8 arg3, void (*arg4)(s32), void (*arg5)(s32));
 // https://decomp.me/scratch/8CIfp
 asm void /*?*/ func_802F7034(void /*?*/);
 // in progress
