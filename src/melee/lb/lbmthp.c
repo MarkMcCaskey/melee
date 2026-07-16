@@ -479,7 +479,7 @@ void lbMthp_8001F578(void)
     OSRestoreInterrupts(intr);
 }
 
-s32 lbMthp_8001F5C4(void)
+s32 lbMthp_GetCurrentFrame(void)
 {
     return MoviePlayer.unk_84;
 }
@@ -499,7 +499,7 @@ s32 lbMthp_8001F5F4(void)
     return MoviePlayer.unk_10C;
 }
 
-s32 lbMthp_8001F604(void)
+s32 lbMthp_IsFinished(void)
 {
     return MoviePlayer.unk_144;
 }

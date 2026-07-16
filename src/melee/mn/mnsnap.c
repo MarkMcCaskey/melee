@@ -816,7 +816,7 @@ void fn_802545C4(void)
     if (state >= 4) {
         if (((u32) (state - 15)) > 1) {
             slot = mnSnap_804A0A10.active_slot;
-            if (lbSnap_8001D338(slot) != 0) {
+            if (lbSnap_IsCardStateChanged(slot) != 0) {
                 mnSnap_80253E90(slot);
             }
         }
@@ -968,10 +968,10 @@ void fn_802545C4(void)
     case 2:
         result = 0;
         if ((mnSnap_804A0A10.dlg_timer == 0) && (mnSnap_804A0A10.timer == 0)) {
-            if (lbSnap_8001D338(0) != 0) {
+            if (lbSnap_IsCardStateChanged(0) != 0) {
                 mnSnap_80253E90(0);
             }
-            if (lbSnap_8001D338(1) != 0) {
+            if (lbSnap_IsCardStateChanged(1) != 0) {
                 mnSnap_80253E90(1);
             }
             result = 1;
@@ -1224,7 +1224,7 @@ void fn_802545C4(void)
 
     case 3:
         slot = mnSnap_804A0A10.active_slot;
-        if (lbSnap_8001D338(slot) != 0) {
+        if (lbSnap_IsCardStateChanged(slot) != 0) {
             mnSnap_80253E90(slot);
         }
         if (mnSnap_804A0A10.dlg_result != 0) {
@@ -1682,7 +1682,7 @@ void fn_802545C4(void)
             s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
             s32 cursor;
             s16* card_status;
-            if (lbSnap_8001D338(other_slot) != 0) {
+            if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                 mnSnap_80253E90(other_slot);
             }
             slot = mnSnap_804A0A10.active_slot;
@@ -1839,7 +1839,7 @@ void fn_802545C4(void)
             }
         } else {
             s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
-            if (lbSnap_8001D338(other_slot) != 0) {
+            if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                 mnSnap_80253E90(other_slot);
             }
             if (mnSnap_804A0A10.card_status[mnSnap_804A0A10.active_slot ^ 1] !=
@@ -1868,7 +1868,7 @@ void fn_802545C4(void)
             }
         } else {
             s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
-            if (lbSnap_8001D338(other_slot) != 0) {
+            if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                 mnSnap_80253E90(other_slot);
             }
             if (mnSnap_804A0A10.card_status[mnSnap_804A0A10.active_slot ^ 1] ==
@@ -2107,7 +2107,7 @@ void fn_802545C4(void)
             short card_status;
             {
                 s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
-                if (lbSnap_8001D338(other_slot) != 0) {
+                if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                     mnSnap_80253E90(other_slot);
                 }
             }
@@ -2212,7 +2212,7 @@ void fn_802545C4(void)
             short card_status;
             {
                 s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
-                if (lbSnap_8001D338(other_slot) != 0) {
+                if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                     mnSnap_80253E90(other_slot);
                 }
             }
@@ -2304,7 +2304,7 @@ void fn_802545C4(void)
             short card_status;
             {
                 s32 other_slot = mnSnap_804A0A10.active_slot ^ 1;
-                if (lbSnap_8001D338(other_slot) != 0) {
+                if (lbSnap_IsCardStateChanged(other_slot) != 0) {
                     mnSnap_80253E90(other_slot);
                 }
             }

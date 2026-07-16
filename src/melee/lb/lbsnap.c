@@ -28,7 +28,7 @@ void lbSnap_8001D2BC(void)
     }
 }
 
-int lbSnap_8001D338(int arg0)
+int lbSnap_IsCardStateChanged(int arg0)
 {
     return lbSnap_80433380.x54_stateChanged[arg0];
 }

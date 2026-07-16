@@ -44,10 +44,10 @@ void gm_801A3F48(GameScene* scene)
         break;
     }
     temp_r31 = lbDvd_8001822C();
-    if (lbHeap_80015BB8(2) == 0) {
+    if (lbHeap_GetStatus(2) == 0) {
         temp_r31->is_heap_persistent[0] = true;
     }
-    if (lbHeap_80015BB8(3) == 0) {
+    if (lbHeap_GetStatus(3) == 0) {
         temp_r31->is_heap_persistent[1] = true;
     }
     lbDvd_80018254();

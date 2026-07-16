@@ -65,7 +65,9 @@ void gmCamera_801A34FC_OnFrame(void)
     u64 button;
 
     data = &gmCamera_VsCameraTextLayout;
-    if ((lbSnap_8001D338(0) != 0) || (lbSnap_8001D338(1) != 0)) {
+    if ((lbSnap_IsCardStateChanged(0) != 0) ||
+        (lbSnap_IsCardStateChanged(1) != 0))
+    {
         for (i = 0; i < 3; i++) {
             if (data->text[i] != NULL) {
                 HSD_SisLib_803A5CC4(data->text[i]);

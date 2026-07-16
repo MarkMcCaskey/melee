@@ -200,10 +200,10 @@ static void mnGallery_80258DBC(HSD_GObj* gobj,
     buttons |= HSD_PadCopyStatus[2].trigger;
     buttons |= HSD_PadCopyStatus[3].trigger;
     lbMthp_8001F578();
-    if (lbMthp_8001F604() != 0) {
+    if (lbMthp_IsFinished() != 0) {
         data->unk1 = data->unk1 + 1;
     }
-    if (gmMainLib_8046B0F0.xC != 0 && lbMthp_8001F604() == 0) {
+    if (gmMainLib_8046B0F0.xC != 0 && lbMthp_IsFinished() == 0) {
         skip = 1;
     }
     pressed = buttons & 0x1300;

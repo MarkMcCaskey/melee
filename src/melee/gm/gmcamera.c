@@ -372,7 +372,9 @@ void gmCamera_801A2AAC(void)
 {
     s32 save_state;
 
-    if ((lbSnap_8001D338(0) != 0) || (lbSnap_8001D338(1) != 0)) {
+    if ((lbSnap_IsCardStateChanged(0) != 0) ||
+        (lbSnap_IsCardStateChanged(1) != 0))
+    {
         gmCamera_801A3048(2);
     } else if (HSD_PadCopyStatus[3].trigger & 0x100) {
         lbAudioAx_80024030(1);
@@ -494,7 +496,9 @@ void gmCamera_801A2D44(void)
     HSD_JObj* jobj_b;
     PAD_STACK(16);
 
-    if ((lbSnap_8001D338(0) != 0) || (lbSnap_8001D338(1) != 0)) {
+    if ((lbSnap_IsCardStateChanged(0) != 0) ||
+        (lbSnap_IsCardStateChanged(1) != 0))
+    {
         gmCamera_801A3048(2);
         return;
     }

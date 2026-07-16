@@ -138,11 +138,11 @@ STATIC_ASSERT(sizeof(struct THPDecComp) == sizeof(struct lbl_804333E0_t));
 /* 01F410 */ void lbMthp_8001F410(const char* filename, u32* rate_table,
                                   void* buf, size_t heap_size, int loop);
 /* 01F578 */ void lbMthp_8001F578(void);
-/* 01F5C4 */ s32 lbMthp_8001F5C4(void);
+/* 01F5C4 */ s32 lbMthp_GetCurrentFrame(void);
 /* 01F5D4 */ s32 lbMthp_8001F5D4(void);
 /* 01F5E4 */ s32 lbMthp_8001F5E4(void);
 /* 01F5F4 */ s32 lbMthp_8001F5F4(void);
-/* 01F604 */ s32 lbMthp_8001F604(void);
+/* 01F604 */ s32 lbMthp_IsFinished(void);
 /* 01F614 */ void lbMthp_8001F614(s32 arg0);
 /* 01F624 */ HSD_SObj* lbMthp_8001F624(HSD_GObj*, int, int);
 /* 01F67C */ void lbMthp_8001F67C(HSD_GObj*, int);

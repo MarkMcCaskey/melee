@@ -7,7 +7,7 @@
 #include "lb/forward.h"
 
 /* 01D2BC */ void lbSnap_8001D2BC(void);
-/* 01D338 */ int lbSnap_8001D338(int);
+/* 01D338 */ int lbSnap_IsCardStateChanged(int);
 /* 01D350 */ int lbSnap_8001D350(int i);
 /* 01D394 */ int lbSnap_8001D394(int);
 /* 01D3B0 */ int lbSnap_8001D3B0(int);

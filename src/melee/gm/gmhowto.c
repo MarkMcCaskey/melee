@@ -54,11 +54,11 @@ void gm_801ACD8C_OnFrame(void)
     PAD_STACK(4);
 
     lbMthp_8001F578();
-    lbMthp_8001F5C4();
-    if (gmMainLib_8046B0F0.xC && lbMthp_8001F604() == 0) {
+    lbMthp_GetCurrentFrame();
+    if (gmMainLib_8046B0F0.xC && lbMthp_IsFinished() == 0) {
         var_r31 = true;
     }
-    if (lbMthp_8001F604() != 0 ||
+    if (lbMthp_IsFinished() != 0 ||
         (gm_GetButtonsTriggered(PAD_ALL_CONTROLLERS) &
          (HSD_PAD_START | HSD_PAD_A)) ||
         var_r31)

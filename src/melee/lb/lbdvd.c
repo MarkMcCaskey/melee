@@ -149,7 +149,7 @@ void* lbDvd_80017740(int type, int entry_num, int transient_heap, int heap,
     entry->state = 1;
     entry->type = type;
     entry->entry_num = entry_num;
-    if (lbHeap_80015BB8(heap)) {
+    if (lbHeap_GetStatus(heap)) {
         HSD_ASSERTREPORT(0x1CB, 0, "%d, %d\n", heap, entry_num);
     }
     entry->heap = heap;
@@ -726,7 +726,7 @@ static inline void inline0(void)
     int i;
     int tmp;
     for (i = 0; i < ARRAY_SIZE(lbDvd_804D37F4); i++) {
-        if (lbHeap_800158E8(lbDvd_804D37F4[i]) == 1) {
+        if (lbHeap_GetTransient(lbDvd_804D37F4[i]) == 1) {
             tmp = lbDvd_804D37F4[i];
             while (lbDvd_80017598(tmp) != 0) {
                 lb_800195D0();
@@ -744,11 +744,11 @@ void lbDvd_80018CF4(int arg0)
             preloadCache.new_scene.mode_scene_changes + 1;
     }
     preloadCache.persistent_heaps = arg0;
-    lbHeap_800158D0(2, 1);
-    lbHeap_800158D0(3, 1);
+    lbHeap_SetTransient(2, 1);
+    lbHeap_SetTransient(3, 1);
 
     for (i = 0; i < 2U; i++) {
-        lbHeap_800158D0(lbDvd_804D37F4[i], 1);
+        lbHeap_SetTransient(lbDvd_804D37F4[i], 1);
     }
     switch (preloadCache.persistent_heaps) {
     case 0:
@@ -759,30 +759,30 @@ void lbDvd_80018CF4(int arg0)
         preloadCache.scene.game_cache = lbDvd_803BA638.game_cache;
         break;
     case 1:
-        lbHeap_800158D0(2, 0);
+        lbHeap_SetTransient(2, 0);
         preloadCache.scene.is_heap_persistent[1] =
             lbDvd_803BA638.is_heap_persistent[1];
         preloadCache.scene.game_cache = lbDvd_803BA638.game_cache;
         break;
     case 2:
-        lbHeap_800158D0(2, 0);
-        lbHeap_800158D0(3, 0);
+        lbHeap_SetTransient(2, 0);
+        lbHeap_SetTransient(3, 0);
         preloadCache.scene.game_cache = lbDvd_803BA638.game_cache;
         break;
     case 3:
-        lbHeap_800158D0(2, 0);
-        lbHeap_800158D0(3, 0);
+        lbHeap_SetTransient(2, 0);
+        lbHeap_SetTransient(3, 0);
         for (i = 0; i < ARRAY_SIZE(lbDvd_804D37F4); i++) {
-            lbHeap_800158D0(lbDvd_804D37F4[i], 0);
+            lbHeap_SetTransient(lbDvd_804D37F4[i], 0);
         }
         break;
     }
-    if (lbHeap_800158E8(2) == 1) {
+    if (lbHeap_GetTransient(2) == 1) {
         while (lbDvd_80017598(2) != 0) {
             lb_800195D0();
         }
     }
-    if (lbHeap_800158E8(3) == 1) {
+    if (lbHeap_GetTransient(3) == 1) {
         while (lbDvd_80017598(3) != 0) {
             lb_800195D0();
         }

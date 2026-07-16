@@ -74,12 +74,12 @@ lbHeap_CreateOffsetViewIfDestroyed(struct lbHeap_HeapOffsetView* view)
     }
 }
 
-void lbHeap_800158D0(int arg0, int arg1)
+void lbHeap_SetTransient(int arg0, int arg1)
 {
     lbHeap_80431FA0.heap_array[arg0].transient = arg1;
 }
 
-int lbHeap_800158E8(int arg0)
+int lbHeap_GetTransient(int arg0)
 {
     return lbHeap_80431FA0.heap_array[arg0].transient;
 }
@@ -174,7 +174,7 @@ void lbHeap_80015900(void)
     }
 }
 
-int lbHeap_80015BB8(int arg0)
+int lbHeap_GetStatus(int arg0)
 {
     return lbHeap_80431FA0.heap_array[arg0].status;
 }
