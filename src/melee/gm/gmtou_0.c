@@ -121,12 +121,36 @@ static void sdata2_order(void)
 /* 4DA734 */ extern f32 lbl_804DA734; // 666.0f
 /* 4DA70C */ extern f32 lbl_804DA70C; // 87.0f
 
-/* 3D9F80 */ static struct TmSettingTable lbl_803D9F80 = {
-    0, 74,  0, 74,  0, 77,  0, 75, 0,  75,  0,  77, 0, 80,  0, 78, 0, 79,
-    0, 79,  0, 81,  0, 0,   0, 82, 0,  82,  0,  92, 0, 92,  0, 96, 0, 93,
-    0, 93,  0, 96,  0, 95,  0, 97, 0,  98,  0,  98, 0, 100, 0, 0,  0, 83,
-    0, 111, 0, 111, 0, 111, 0, 88, 0,  101, 0,  0,  2, 3,   0, 2,  0, 1,
-    0, 0,   0, 0,   2, 2,   4, 16, 31, 3,   63, 3,  3, 3,   9, 0,
+typedef struct TmSettingTable {
+    u16 text_ids[32];
+    u8 min[6][2];
+    u8 max[6][2];
+} TmSettingTable;
+STATIC_ASSERT(offsetof(TmSettingTable, min) == 0x40);
+STATIC_ASSERT(offsetof(TmSettingTable, max) == 0x4C);
+STATIC_ASSERT(sizeof(TmSettingTable) == 0x58);
+
+/* 3D9F80 */ static TmSettingTable lbl_803D9F80 = {
+    {
+        74, 74, 77, 75, 75, 77, 80, 78, 79,  79, 81, 0,   82,  82,  92, 92,
+        96, 93, 93, 96, 95, 97, 98, 98, 100, 0,  83, 111, 111, 111, 88, 101,
+    },
+    {
+        { 0, 0 },
+        { 2, 3 },
+        { 0, 2 },
+        { 0, 1 },
+        { 0, 0 },
+        { 0, 0 },
+    },
+    {
+        { 2, 2 },
+        { 4, 16 },
+        { 31, 3 },
+        { 63, 3 },
+        { 3, 3 },
+        { 9, 0 },
+    },
 };
 
 typedef void (*lbl_803D9FD8_fn)(s32*, u32, u32);
@@ -142,7 +166,7 @@ typedef void (*lbl_803D9FD8_fn)(s32*, u32, u32);
 void fn_80190ABC(int mode)
 {
     struct Lbl804799B8_t* state = &lbl_804799B8;
-    u16* table = (u16*) &lbl_803D9F80;
+    u16* text_ids = lbl_803D9F80.text_ids;
     TmData* tm;
     s32 cur_opt;
     s32 opt;
@@ -158,12 +182,12 @@ void fn_80190ABC(int mode)
     switch (mode) {
     case 0: {
         HSD_SisLib_803A6368(tm->x4E0,
-                            (table + opt * 2)[!!gm_804771C4.match_type]);
+                            (text_ids + opt * 2)[!!gm_804771C4.match_type]);
         break;
     }
     case 2: {
-        HSD_SisLib_803A6368(tm->x4E8[opt],
-                            (table + opt * 2 + !!gm_804771C4.match_type)[0xE]);
+        HSD_SisLib_803A6368(tm->x4E8[opt], (text_ids + opt * 2 +
+                                            !!gm_804771C4.match_type)[0xE]);
         break;
     }
     case 3: {
@@ -184,11 +208,11 @@ void fn_80190ABC(int mode)
                 display_val = val + 0xD7;
                 break;
             default:
-                display_val = lbl_803D9D20.x0[val] + table[opt + 0x1A];
+                display_val = lbl_803D9D20.x0[val] + text_ids[opt + 0x1A];
                 break;
             }
         } else {
-            display_val = table[opt + 0x1A];
+            display_val = text_ids[opt + 0x1A];
             display_val += (&tm->match_type)[opt];
         }
         HSD_SisLib_803A6368(tm->x500[opt], display_val);
@@ -1608,7 +1632,7 @@ void fn_801937C4(s32* arg0, u32 arg1, u32 arg2)
         global = &gm_804771C4;
         arg0[0] = idx + 1;
         idx = arg0[0];
-        tp = table->pad_0 + (idx << 1);
+        tp = (u8*) &table->text_ids[idx];
         dp = arg0 + idx;
         for (; idx < 6; idx++) {
             *++dp =

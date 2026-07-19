@@ -1228,15 +1228,6 @@ struct lbl_8046B488_t {
 }; /* size = 0x1E0 */
 STATIC_ASSERT(sizeof(struct lbl_8046B488_t) == 0x1E0);
 
-typedef struct TmSettingTable {
-    u8 pad_0[0x40];
-    u8 min[6][2];
-    u8 max[6][2];
-} TmSettingTable;
-STATIC_ASSERT(offsetof(struct TmSettingTable, min) == 0x40);
-STATIC_ASSERT(offsetof(struct TmSettingTable, max) == 0x4C);
-STATIC_ASSERT(sizeof(struct TmSettingTable) == 0x58);
-
 /// Start/end/loop anim frame triplet for one tournament model anim state.
 typedef struct TmAnimFrames {
     /* 0x0 */ u16 start;
