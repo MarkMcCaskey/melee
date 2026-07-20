@@ -296,7 +296,7 @@ void ifMagnify_802FBBDC(HSD_GObj* arg0)
                 continue;
             }
 
-            Player_80036978(i, (s32) &world_pos);
+            Player_80036978(i, &world_pos);
             is_outside = true;
             if (!(world_pos.x < Stage_GetCamBoundsLeftOffset()) &&
                 !(world_pos.x > Stage_GetCamBoundsRightOffset()))
