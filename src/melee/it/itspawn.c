@@ -18,6 +18,12 @@
 #include <baselib/memory.h>
 #include <baselib/random.h>
 
+typedef struct ItemSpawnData {
+    RandomItemSpawner spawner;
+    ItemPickTable drop_table;
+    ItemPickTable monster_table;
+} ItemSpawnData;
+
 ItemPickTable monster;
 ItemPickTable it_804A0E50;
 RandomItemSpawner it_804A0E30;
@@ -28,6 +34,8 @@ static void sdata2_order(void)
     (void) S32_TO_F32;
     (void) 0.0F;
     (void) 0.99F;
+    (void) it_804A0E30;
+    (void) it_804A0E50;
 }
 
 void it_8026C47C(struct it_8026C47C_arg0_t* arg_struct)
@@ -283,7 +291,7 @@ void it_8026CB9C(s32* counts, u64 mask, f32 weight)
 
 void it_8026CD50(s32* counts, u64 mask, f32 weight)
 {
-    ItemPickTable* table = &it_804A0E50;
+    ItemSpawnData* data = (ItemSpawnData*) &it_804A0E30;
     s32* p;
     s32 cnt;
     ItemKind it_kind;
@@ -308,9 +316,9 @@ void it_8026CD50(s32* counts, u64 mask, f32 weight)
         it_kind++;
         mask >>= 1;
     }
-    table->size = cnt;
-    *(item_kinds = &table->x4) = HSD_MemAlloc(cnt * 4);
-    *(weights = &table->xC) = HSD_MemAlloc(cnt * 4);
+    data->drop_table.size = cnt;
+    *(item_kinds = &data->drop_table.x4) = HSD_MemAlloc(cnt * 4);
+    *(weights = &data->drop_table.xC) = HSD_MemAlloc(cnt * 4);
 
     idx = (cnt2 = 0);
     mask = backup;
