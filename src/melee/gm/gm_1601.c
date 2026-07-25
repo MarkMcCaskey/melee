@@ -2402,7 +2402,7 @@ int gm_801647F8(u8 arg0)
 bool gm_IsCKindUnlocked(u8 ckind)
 {
     u16* unlocked_chars_bitmask = gmMainLib_GetUnlockedCharactersBitmaskPtr();
-    u8 selkind = ckind_to_selkind_map[ckind];
+    u8 selkind = gm_CKindToSelKind(ckind);
     u8 unlock_bit = gm_SelKindToUnlockIndex(selkind);
 
     if (unlock_bit == NUM_UNLOCKABLE_CHARACTERS ||
@@ -2432,7 +2432,7 @@ void gm_UnlockCKind(CharacterKind ckind)
     u8 notify_val;
 
     char_unlock_mask = gmMainLib_GetUnlockedCharactersBitmaskPtr();
-    selkind = ckind_to_selkind_map[(u8) ckind];
+    selkind = gm_CKindToSelKind(ckind);
 
     unlock_idx = gm_SelKindToUnlockIndex(selkind);
 
@@ -2456,7 +2456,7 @@ void gm_80164A0C(u8 ckind)
 {
     u16* unlockable_character_bitfield =
         gmMainLib_GetUnlockedCharactersBitmaskPtr();
-    s32 selkind = ckind_to_selkind_map[ckind];
+    s32 selkind = gm_CKindToSelKind(ckind);
     u8 idx = gm_SelKindToUnlockIndex(selkind);
     if (idx != NUM_UNLOCKABLE_CHARACTERS) {
         *unlockable_character_bitfield &= (u16) ~(1ULL << idx);

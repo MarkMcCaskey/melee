@@ -712,7 +712,7 @@ HSD_LObj* HSD_LObjGetCurrentByType(u16 flags)
     u32 type = flags & LOBJ_TYPE_MASK;
     while (cur != NULL) {
         HSD_LObj* lobj = cur->data;
-        if (type == (lobj->flags & LOBJ_TYPE_MASK)) {
+        if (type == HSD_LObjGetType(lobj)) {
             return lobj;
         }
         cur = cur->next;
