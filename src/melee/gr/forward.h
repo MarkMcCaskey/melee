@@ -174,6 +174,11 @@ typedef enum StKind {
     /* 0x55 */ St_Kind_Heal = 0x55,
 } StKind;
 
+/// Player spawn point index.
+typedef enum St_Player_InitPos {
+    /* -0x01 */ St_Player_InitPos_None = -1,
+} St_Player_InitPos;
+
 typedef enum StadiumGrType {
     PsType_Display = 1,
 } StadiumGrType;

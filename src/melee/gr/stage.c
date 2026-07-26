@@ -219,19 +219,16 @@ void Stage_80224E38(Vec3* arg0, s32 arg1)
     Ground_801C2D24(arg1 + 4, arg0);
 }
 
-void Stage_80224E64(enum_t arg0, Vec3* arg_vec)
+void Stage_80224E64(enum_t no, Vec3* arg_vec)
 {
     bool bool1;
 
     f32 counter_f;
     Vec3 internal_vec;
 
-    if (arg0 == -1) {
-        /// @todo Needs to be #HSD_ASSERT. Also remove fake zero-byte padding.
-        __assert("stage.c", 360, "no!=St_Player_InitPos_None\0\0\0\0");
-    }
+    HSD_ASSERT(360, no!=St_Player_InitPos_None);
 
-    if (arg0 == 4) {
+    if (no == 4) {
         bool1 = 0;
         for (counter_f = -10.0F; counter_f < 100.0f; counter_f += 10.0f) {
             s32 temp_ret =
@@ -265,7 +262,7 @@ void Stage_80224E64(enum_t arg0, Vec3* arg_vec)
         arg_vec->x = 0.0F;
         return;
     }
-    Ground_801C2D24(arg0, arg_vec);
+    Ground_801C2D24(no, arg_vec);
 }
 
 bool Stage_80224FDC(Vec3* arg0)
@@ -340,7 +337,10 @@ StKind Stage_80225194(void)
 }
 
 /// Indexed by #StKind.
-struct StageIdMapEntry stage_id_map[] = {
+/// @remarks The alignment is what places this after the padding that follows
+/// the assert string in #Stage_80224E64; that padding used to be spelled as
+/// trailing NULs inside the string itself.
+struct StageIdMapEntry stage_id_map[] ATTRIBUTE_ALIGN(8) = {
     { Gr_Kind_Unk00, 0, 0 },        { Gr_Kind_Test, 0, 0 },
     { Gr_Kind_Izumi, 0, 0 },        { Gr_Kind_PStadium, 0, 0 },
     { Gr_Kind_Castle, 0, 0 },       { Gr_Kind_Kongo, 0, 0 },
