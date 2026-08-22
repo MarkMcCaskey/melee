@@ -8168,18 +8168,6 @@ static inline bool ftCo_800B2AFC_CheckFloor(Vec3* pos, int* line, u32* flags,
 void ftCo_800B2AFC(Fighter* fp)
 {
     UNUSED u8 pad_high[4];
-    u32 flags0;
-    Vec3 floor_pos26;
-    Vec3 floor_normal0;
-    Vec3 floor_pos0;
-    u32 flags1;
-    Vec3 floor_normal1;
-    int line1;
-    int line3;
-    Vec3 floor_pos1;
-    Vec3 floor_normal3;
-    Vec3 floor_pos3;
-    int line0;
 
     switch (fp->x1A88.xC) {
     case 0: {
@@ -8203,6 +8191,10 @@ void ftCo_800B2AFC(Fighter* fp)
             do_act = 1;
         }
         if (do_act != 0) {
+            u32 flags0;
+            int line0;
+            Vec3 floor_normal0;
+            Vec3 floor_pos0;
             f32 x = fp->cur_pos.x;
             f32 x2 = x;
             f32 y = fp->cur_pos.y;
@@ -8246,6 +8238,10 @@ void ftCo_800B2AFC(Fighter* fp)
             do_act = 1;
         }
         if (do_act != 0) {
+            u32 flags1;
+            int line1;
+            Vec3 floor_normal1;
+            Vec3 floor_pos1;
             f32 x = fp->x1A88.x98.x;
             f32 x2 = x;
             f32 y = fp->x1A88.x98.y;
@@ -8278,7 +8274,6 @@ void ftCo_800B2AFC(Fighter* fp)
         return;
     case 3: {
         struct Fighter_x1A88_t* data = &fp->x1A88;
-        s32 result;
         s32 found;
         s32 do_act;
         s32 x18;
@@ -8298,6 +8293,9 @@ void ftCo_800B2AFC(Fighter* fp)
         }
         if (do_act != 0) {
             u32 flags3;
+            int line3;
+            Vec3 floor_normal3;
+            Vec3 floor_pos3;
             f32 x = fp->cur_pos.x;
             f32 x2 = x;
             f32 y = fp->cur_pos.y;
@@ -8436,6 +8434,7 @@ void ftCo_800B2AFC(Fighter* fp)
             do_act = 1;
         }
         if (do_act != 0) {
+            Vec3 floor_pos26;
             u32 flags26;
             int line26;
             Vec3 floor_normal26;
