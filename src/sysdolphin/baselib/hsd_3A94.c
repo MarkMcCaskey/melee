@@ -46,6 +46,13 @@ typedef struct CardCmd {
 } CardCmd;
 
 #ifdef MUST_MATCH
+/// @todo This matching-only storage still relies on undefined C: the field
+/// accesses below precede the declared object. MWCC's CInline pass materializes
+/// ordinary @c CardCmd locals at 0x60 (final), 0x94 (first), and 0xC4 (clear),
+/// while the original function uses 0x44, 0x94, and 0x68 respectively. The
+/// CodeGen local-home walk then sends that fixed order to a simple bump
+/// allocator, so this is not register coloring or stack-slot coalescing.
+/// Reconstruct the original inline/local ownership and remove these offsets.
 typedef union CardCmdStorage {
     CardCmd command;
     s32 words[9];
@@ -2597,10 +2604,6 @@ static inline s32 queueCardCommand2Final(CardState* state, s32 block,
 #ifdef MUST_MATCH
     CardCmdStorage storage;
 
-    /// @todo MWCC colors @c storage at 0x60(r1), but the original command is
-    /// at 0x44(r1). A normal local @c CardCmd matches every instruction except
-    /// these stack displacements. This still addresses before the C object;
-    /// reproduce that stack coloring and remove the matching-only adjustment.
     MATCH_CARD_CMD_FIELD(storage, type, 0x1C) = 2;
     MATCH_CARD_CMD_FIELD(storage, state, 0x1C) = (s32) state;
     MATCH_CARD_CMD_FIELD(storage, x10, 0x1C) = block;
@@ -2694,10 +2697,6 @@ static inline s32 queueClearDataBlock(CardState* state, const u8* dst,
 #ifdef MUST_MATCH
     CardCmdStorage storage;
 
-    /// @todo MWCC colors @c storage at 0xC4(r1), but the original command is
-    /// at 0x68(r1). A normal local @c CardCmd matches every instruction except
-    /// these stack displacements. This still addresses before the C object;
-    /// reproduce that stack coloring and remove the matching-only adjustment.
     MATCH_CARD_CMD_FIELD(storage, type, 0x5C) = 4;
     MATCH_CARD_CMD_FIELD(storage, state, 0x5C) = (s32) state;
     MATCH_CARD_CMD_FIELD(storage, x10, 0x5C) = 0;
