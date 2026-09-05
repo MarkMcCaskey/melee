@@ -1,18 +1,18 @@
 #include "psdisp.h"
 
-#include <string.h>
+#include <sysdolphin/baselib/forward.h>
 
-#include "cobj.h"
-#include "fog.h"
-#include "forward.h"
-#include "lobj.h"
-#include "mtx.h"
-#include "particle.h"
-#include "psdisptev.h"
-#include "psstructs.h"
-#include "state.h"
-#include "util.h"
+#include <string.h>
 #include <dolphin/gx.h>
+#include <sysdolphin/baselib/cobj.h>
+#include <sysdolphin/baselib/fog.h>
+#include <sysdolphin/baselib/lobj.h>
+#include <sysdolphin/baselib/mtx.h>
+#include <sysdolphin/baselib/particle.h>
+#include <sysdolphin/baselib/psdisptev.h>
+#include <sysdolphin/baselib/psstructs.h>
+#include <sysdolphin/baselib/state.h>
+#include <sysdolphin/baselib/util.h>
 
 // MSL/math.h defines a non-IEEE FLT_EPSILON
 #undef FLT_EPSILON
@@ -522,13 +522,13 @@ static inline HSD_Particle* psDispSubPoint(HSD_Particle* pp)
     HSD_Particle* q;
     s32 count;
     s32 i;
-    u8 w;
+    s32 w;
 
     psSetCurrentMtx(GX_PNMTX0);
-    w = (pp->size > 42.5) ? 255.0f : 6.0f * pp->size;
-    if (prevPointSize != w) {
-        prevPointSize = w;
-        GXSetPointSize(w, GX_TO_ONE);
+    w = (s32) ((pp->size > 42.5) ? 255.0f : 6.0f * pp->size);
+    if (prevPointSize != (s32) (u8) w) {
+        prevPointSize = (u8) w;
+        GXSetPointSize((u8) w, GX_TO_ONE);
     }
     last = pp;
     p = buf;
@@ -615,14 +615,14 @@ static inline HSD_Particle* psDispSubPointTrail(HSD_Particle* pp)
     HSD_Particle* q;
     s32 count;
     s32 i;
-    u8 w;
+    s32 w;
 
     (void) c;
     psSetCurrentMtx(GX_PNMTX0);
-    w = (pp->size > 42.5) ? 255.0f : 6.0f * pp->size;
-    if (prevLineWidth != (s32) w) {
-        prevLineWidth = w;
-        GXSetLineWidth(w, GX_TO_ONE);
+    w = (s32) ((pp->size > 42.5) ? 255.0f : 6.0f * pp->size);
+    if (prevLineWidth != (s32) (u8) w) {
+        prevLineWidth = (u8) w;
+        GXSetLineWidth((u8) w, GX_TO_ONE);
     }
     p = vbuf;
     c = cbuf;
@@ -715,10 +715,8 @@ static inline HSD_Particle* psDispSubPointTrail(HSD_Particle* pp)
         }
     }
     if (count != 0) {
-        GXColor* draw_colors;
-
         p = vbuf;
-        draw_colors = cbuf;
+        c = cbuf;
         if (pp->kind & DispTexture) {
             setVtxDesc(2);
             GXBegin(GX_LINES, GX_VTXFMT2, count * 2);
@@ -728,19 +726,17 @@ static inline HSD_Particle* psDispSubPointTrail(HSD_Particle* pp)
         }
         for (i = count; i != 0; i--) {
             GXPosition3f32(p[1].x, p[1].y, p[1].z);
-            GXColor4u8(draw_colors[1].r, draw_colors[1].g, draw_colors[1].b,
-                       draw_colors[1].a);
+            GXColor4u8(c[1].r, c[1].g, c[1].b, c[1].a);
             if (pp->kind & DispTexture) {
                 GXTexCoord1x8(0);
             }
             GXPosition3f32(p[0].x, p[0].y, p[0].z);
-            GXColor4u8(draw_colors[0].r, draw_colors[0].g, draw_colors[0].b,
-                       draw_colors[0].a);
+            GXColor4u8(c[0].r, c[0].g, c[0].b, c[0].a);
             if (pp->kind & DispTexture) {
                 GXTexCoord1x8(1);
             }
             p += 2;
-            draw_colors += 2;
+            c += 2;
         }
     }
     (void) p;
@@ -1053,7 +1049,6 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
             f32 prev_x_sum;
             f32 pv13;
             f32 pv03;
-            f32 view_offset;
 
             if (pp->kind & Tornado) {
                 calcTornadoLastPos(pp, &prev_x, &prev_y, &prev_z);
@@ -1062,7 +1057,6 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
                 prev_y = pp->pos.y - pp->vel.y;
                 prev_z = pp->pos.z - pp->vel.z;
             }
-            view_offset = vmtx[2][3];
             w0 = vmtx[2][3] +
                  (vmtx[2][2] * pp->pos.z +
                   (vmtx[2][0] * pp->pos.x + vmtx[2][1] * pp->pos.y));
@@ -1070,8 +1064,8 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
                 return;
             }
             w0inv = -1.0f / w0;
-            w1 = view_offset + (prev_z * vmtx[2][2] +
-                                (vmtx[2][1] * prev_y + prev_x * vmtx[2][0]));
+            w1 = vmtx[2][3] + (prev_z * vmtx[2][2] +
+                               (vmtx[2][1] * prev_y + prev_x * vmtx[2][0]));
             if (0.0f == w1) {
                 return;
             }
@@ -1175,38 +1169,60 @@ static inline void psScaleAppSRTAxes(HSD_Particle* pp, Mtx mtx)
     mtx[2][2] *= pp->size;
 }
 
-static inline void psUpdateAppSRTMtx(HSD_Particle* pp)
+/**
+ * @remarks @p always_stamp is a compile-time constant at both call sites: the
+ * point path stamps @c frameNum unconditionally under its own NULL guard, the
+ * polygon path only inside the changed-frame block. Both branches fold away.
+ */
+static inline void psUpdateAppSRT(HSD_Particle* pp, bool always_stamp,
+                                  Mtx scratch_mtx, Vec3* scratch_scale)
 {
-    if (pp->appsrt->status != PS_APPSTATUS_STILL) {
-        HSD_psAppSRT* appsrt = pp->appsrt;
-        Vec3* translate = &appsrt->translate;
-        Vec3* rotate = (Vec3*) &appsrt->rot;
-        Vec3* scale = &appsrt->scale;
-        MtxPtr mmtx = appsrt->mmtx;
+    if (pp->appsrt->frameNum != psFrameNum) {
+        f32 scale_x;
+        f32 scale_y;
 
-        HSD_MtxSRT(mmtx, scale, rotate, translate, NULL);
-    }
-    if (pp->appsrt->status == PS_APPSTATUS_ONCE) {
-        pp->appsrt->status = PS_APPSTATUS_STILL;
-    }
-    PSMTXConcat(vmtx, pp->appsrt->mmtx, (MtxPtr) &pp->appsrt->ssx);
-}
+        if (pp->appsrt->status != PS_APPSTATUS_STILL) {
+            HSD_psAppSRT* appsrt = pp->appsrt;
+            Vec3* translate = &appsrt->translate;
+            Vec3* rotate = (Vec3*) &appsrt->rot;
+            Vec3* scale = &appsrt->scale;
+            MtxPtr mmtx = appsrt->mmtx;
 
-static inline void psUpdateAppSRTBillboard(HSD_Particle* pp, Mtx scratch_mtx,
-                                           Vec3* scratch_scale)
-{
-    if (pp->appsrt->xA2 != 0) {
-        PSMTXIdentity(scratch_mtx);
-        scratch_mtx[0][3] = pp->appsrt->translate.x;
-        scratch_mtx[1][3] = pp->appsrt->translate.y;
-        scratch_mtx[2][3] = pp->appsrt->translate.z;
-        PSMTXConcat(vmtx, scratch_mtx, scratch_mtx);
-        HSD_MtxGetScale(scratch_mtx, scratch_scale);
-        PSMTXScale((MtxPtr) &pp->appsrt->ssx, scratch_scale->x,
-                   scratch_scale->y, scratch_scale->z);
-        pp->appsrt->x70 = scratch_mtx[0][3];
-        pp->appsrt->x80 = scratch_mtx[1][3];
-        pp->appsrt->x90 = scratch_mtx[2][3];
+            HSD_MtxSRT(mmtx, scale, rotate, translate, NULL);
+        }
+        if (pp->appsrt->status == PS_APPSTATUS_ONCE) {
+            pp->appsrt->status = PS_APPSTATUS_STILL;
+        }
+        PSMTXConcat(vmtx, pp->appsrt->mmtx, (MtxPtr) &pp->appsrt->ssx);
+        scale_x = pp->appsrt->ssx * pp->appsrt->ssx +
+                  pp->appsrt->x74 * pp->appsrt->x74 +
+                  pp->appsrt->x84 * pp->appsrt->x84;
+        scale_x = sqrtf(scale_x);
+        pp->appsrt->x94 = scale_x;
+        scale_y = pp->appsrt->ssy * pp->appsrt->ssy +
+                  pp->appsrt->x78 * pp->appsrt->x78 +
+                  pp->appsrt->x88 * pp->appsrt->x88;
+        scale_y = sqrtf(scale_y);
+        pp->appsrt->x98 = scale_y;
+        if (pp->appsrt->xA2 != 0) {
+            PSMTXIdentity(scratch_mtx);
+            scratch_mtx[0][3] = pp->appsrt->translate.x;
+            scratch_mtx[1][3] = pp->appsrt->translate.y;
+            scratch_mtx[2][3] = pp->appsrt->translate.z;
+            PSMTXConcat(vmtx, scratch_mtx, scratch_mtx);
+            HSD_MtxGetScale(scratch_mtx, scratch_scale);
+            PSMTXScale((MtxPtr) &pp->appsrt->ssx, scratch_scale->x,
+                       scratch_scale->y, scratch_scale->z);
+            pp->appsrt->x70 = scratch_mtx[0][3];
+            pp->appsrt->x80 = scratch_mtx[1][3];
+            pp->appsrt->x90 = scratch_mtx[2][3];
+        }
+        if (!always_stamp) {
+            pp->appsrt->frameNum = psFrameNum;
+        }
+    }
+    if (always_stamp) {
+        pp->appsrt->frameNum = psFrameNum;
     }
 }
 
@@ -1220,28 +1236,11 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
     f32 prev_x;
     f32 prev_y;
     f32 prev_z;
-    u8 w;
+    s32 w;
 
     psSetCurrentMtx(GX_PNMTX1);
     if (pp->appsrt != NULL) {
-        if (pp->appsrt->frameNum != psFrameNum) {
-            f32 scale_x;
-            f32 scale_y;
-
-            psUpdateAppSRTMtx(pp);
-            scale_x = pp->appsrt->ssx * pp->appsrt->ssx +
-                      pp->appsrt->x74 * pp->appsrt->x74 +
-                      pp->appsrt->x84 * pp->appsrt->x84;
-            scale_x = sqrtf(scale_x);
-            pp->appsrt->x94 = scale_x;
-            scale_y = pp->appsrt->ssy * pp->appsrt->ssy +
-                      pp->appsrt->x78 * pp->appsrt->x78 +
-                      pp->appsrt->x88 * pp->appsrt->x88;
-            scale_y = sqrtf(scale_y);
-            pp->appsrt->x98 = scale_y;
-            psUpdateAppSRTBillboard(pp, scratch_mtx, &scratch_scale);
-        }
-        pp->appsrt->frameNum = psFrameNum;
+        psUpdateAppSRT(pp, true, scratch_mtx, &scratch_scale);
     }
     {
         HSD_psAppSRT* appsrt = pp->appsrt;
@@ -1291,13 +1290,13 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
                                (pp->appsrt->x84 * dx + pp->appsrt->x88 * dy));
     }
 
-    w = (pp->size > 42.5) ? 255.0f : 6.0f * pp->size;
+    w = (s32) ((pp->size > 42.5) ? 255.0f : 6.0f * pp->size);
     if (pp->kind & Trail) {
         GXColor draw_color;
 
-        if (prevLineWidth != (s32) w) {
-            prevLineWidth = w;
-            GXSetLineWidth(w, GX_TO_ONE);
+        if (prevLineWidth != (s32) (u8) w) {
+            prevLineWidth = (u8) w;
+            GXSetLineWidth((u8) w, GX_TO_ONE);
         }
         getClrTrail(pp, &draw_color);
         if (pp->kind & DispTexture) {
@@ -1319,9 +1318,9 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
             GXTexCoord1x8(1);
         }
     } else {
-        if (prevPointSize != (s32) w) {
-            prevPointSize = w;
-            GXSetPointSize(w, GX_TO_ONE);
+        if (prevPointSize != (s32) (u8) w) {
+            prevPointSize = (u8) w;
+            GXSetPointSize((u8) w, GX_TO_ONE);
         }
         if (pp->kind & DispTexture) {
             setVtxDesc(0);
@@ -1354,24 +1353,7 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
     f32 angle;
     u8* it = texform;
 
-    if (pp->appsrt->frameNum != psFrameNum) {
-        f32 scale_x;
-        f32 scale_y;
-
-        psUpdateAppSRTMtx(pp);
-        scale_x = pp->appsrt->ssx * pp->appsrt->ssx +
-                  pp->appsrt->x74 * pp->appsrt->x74 +
-                  pp->appsrt->x84 * pp->appsrt->x84;
-        scale_x = sqrtf(scale_x);
-        pp->appsrt->x94 = scale_x;
-        scale_y = pp->appsrt->ssy * pp->appsrt->ssy +
-                  pp->appsrt->x78 * pp->appsrt->x78 +
-                  pp->appsrt->x88 * pp->appsrt->x88;
-        scale_y = sqrtf(scale_y);
-        pp->appsrt->x98 = scale_y;
-        psUpdateAppSRTBillboard(pp, draw_mtx, &scratch_scale);
-        pp->appsrt->frameNum = psFrameNum;
-    }
+    psUpdateAppSRT(pp, false, draw_mtx, &scratch_scale);
     {
         f32 app_cur_x;
         f32 app_cur_y;
@@ -1558,12 +1540,14 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
     if (abs_angle > 0.01) {
         f32 c = cosf(angle);
         f32 s = sinf(angle);
-        f32 old_x = ax;
+        f32 old_bx;
+        f32 old_ax;
+        old_ax = ax;
+        old_bx = bx;
         ax = c * ax - s * ay;
-        ay = s * old_x + c * ay;
-        old_x = bx;
+        ay = s * old_ax + c * ay;
         bx = c * bx - s * by;
-        by = s * old_x + c * by;
+        by = s * old_bx + c * by;
     }
     psSetCurrentMtx(GX_PNMTX1);
     /** @todo Later HSD shares this emission with the polygon path; Melee's
