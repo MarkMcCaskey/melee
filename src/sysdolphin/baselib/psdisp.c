@@ -1093,8 +1093,8 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
                 return;
             }
             w0inv = -1.0f / w0;
-            w1 = vmtx[2][3] + (prev_z * vmtx[2][2] +
-                               (vmtx[2][1] * prev_y + prev_x * vmtx[2][0]));
+            w1 = vmtx[2][3] + (vmtx[2][2] * prev_z +
+                               (vmtx[2][0] * prev_x + vmtx[2][1] * prev_y));
             if (0.0f == w1) {
                 return;
             }
@@ -1106,13 +1106,16 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
                                   pvmtx[0][1] * pp->pos.y))) -
                 w1inv *
                     (pv03 + (pvmtx[0][2] * prev_z +
-                             (prev_x * pvmtx[0][0] + pvmtx[0][1] * prev_y)));
-            y = w0inv * (pv13 + (pp->pos.z * pvmtx[1][2] +
+                             (pvmtx[0][0] * prev_x + pvmtx[0][1] * prev_y)));
+            y = w0inv * (pv13 + (pvmtx[1][2] * pp->pos.z +
                                  (pvmtx[1][0] * pp->pos.x +
-                                  pp->pos.y * pvmtx[1][1]))) -
+                                  pvmtx[1][1] * pp->pos.y))) -
                 w1inv *
-                    (pv13 + (prev_z * pvmtx[1][2] +
-                             (prev_x * pvmtx[1][0] + pvmtx[1][1] * prev_y)));
+                    (pv13 + (pvmtx[1][2] * prev_z +
+                             (pvmtx[1][0] * prev_x + pvmtx[1][1] * prev_y)));
+            /* The second read pools the y-row product into a shared temp,
+             * which is what keeps it out of the spill pair. */
+            (void) (pvmtx[1][1] * prev_y);
         } else if (pp->kind & Tornado) {
             f32 prev_x;
             f32 prev_y;
