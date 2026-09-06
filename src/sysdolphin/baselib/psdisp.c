@@ -1575,7 +1575,6 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                                 (f12 * pp->pos.x + f8 * pp->pos.y))) -
                 w1inv * (f13 + (f11 * prev_z + (f12 * prev_x + f8 * prev_y)));
         } else {
-
             s800 = prj[1] * pp->appsrt->ssx + prj[2];
             s7FC = prj[1] * pp->appsrt->ssy + prj[2];
             s7F8 = prj[1] * pp->appsrt->x6C + prj[2];
