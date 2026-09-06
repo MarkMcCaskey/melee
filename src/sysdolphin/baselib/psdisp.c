@@ -1274,24 +1274,17 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
             }
         }
     }
-    {
-        HSD_psAppSRT* appsrt = pp->appsrt;
-        f32 y_component;
-
-        (void) y_component;
-        cur_x = appsrt->ssy * (y_component = pp->pos.y);
-        cur_y = appsrt->x78 * y_component;
-        cur_z = appsrt->x88 * y_component;
-        cur_x = appsrt->ssx * pp->pos.x + cur_x;
-        cur_z = (y_component = appsrt->x74 * pp->pos.x + cur_y,
-                 appsrt->x84 * pp->pos.x + cur_z);
-        cur_z = (cur_x = appsrt->x6C * pp->pos.z + cur_x,
-                 cur_y = appsrt->x7C * pp->pos.z + y_component,
-                 appsrt->x8C * pp->pos.z + cur_z);
-        cur_x = appsrt->x70 + cur_x;
-        cur_y = appsrt->x80 + cur_y;
-        cur_z = appsrt->x90 + cur_z;
-    }
+    cur_x = pp->appsrt->x70 +
+            (pp->appsrt->x6C * pp->pos.z +
+             (pp->appsrt->ssx * pp->pos.x + pp->appsrt->ssy * pp->pos.y));
+    cur_y = pp->appsrt->x80 +
+            (pp->appsrt->x7C * pp->pos.z +
+             (pp->appsrt->x74 * pp->pos.x + pp->appsrt->x78 * pp->pos.y));
+    cur_z = pp->appsrt->x90 +
+            (pp->appsrt->x8C * pp->pos.z +
+             (pp->appsrt->x84 * pp->pos.x + pp->appsrt->x88 * pp->pos.y));
+    (void) (pp->pos.x, pp->pos.y);
+    (void) (pp->pos.z, pp->size);
     if (pp->kind & Tornado) {
         f32 x;
         f32 y;
@@ -1308,18 +1301,18 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
             pp->appsrt->x90 + (pp->appsrt->x8C * z +
                                (pp->appsrt->x84 * x + pp->appsrt->x88 * y));
     } else {
-        f32 dy = pp->pos.y - pp->vel.y;
-        f32 dx = pp->pos.x - pp->vel.x;
-        f32 dz = pp->pos.z - pp->vel.z;
         prev_x =
-            pp->appsrt->x70 + (pp->appsrt->x6C * dz +
-                               (pp->appsrt->ssx * dx + pp->appsrt->ssy * dy));
+            pp->appsrt->x70 + (pp->appsrt->x6C * (pp->pos.z - pp->vel.z) +
+                               (pp->appsrt->ssx * (pp->pos.x - pp->vel.x) +
+                                pp->appsrt->ssy * (pp->pos.y - pp->vel.y)));
         prev_y =
-            pp->appsrt->x80 + (pp->appsrt->x7C * dz +
-                               (pp->appsrt->x74 * dx + pp->appsrt->x78 * dy));
+            pp->appsrt->x80 + (pp->appsrt->x7C * (pp->pos.z - pp->vel.z) +
+                               (pp->appsrt->x74 * (pp->pos.x - pp->vel.x) +
+                                pp->appsrt->x78 * (pp->pos.y - pp->vel.y)));
         prev_z =
-            pp->appsrt->x90 + (pp->appsrt->x8C * dz +
-                               (pp->appsrt->x84 * dx + pp->appsrt->x88 * dy));
+            pp->appsrt->x90 + (pp->appsrt->x8C * (pp->pos.z - pp->vel.z) +
+                               (pp->appsrt->x84 * (pp->pos.x - pp->vel.x) +
+                                pp->appsrt->x88 * (pp->pos.y - pp->vel.y)));
     }
 
     w = (pp->size > 42.5) ? 255.0f : 6.0f * pp->size;
