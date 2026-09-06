@@ -564,11 +564,8 @@ static inline HSD_Particle* psDispSubPoint(HSD_Particle* pp)
                     GXBegin(GX_POINTS, GX_VTXFMT1, 16U);
                 }
                 for (i = count; i != 0; i--) {
-                    f32 z = p->z;
-                    f32 y = p->y;
-                    f32 x = p->x;
+                    GXPosition3f32(p->x, p->y, p->z);
                     p++;
-                    GXPosition3f32(x, y, z);
                     if (pp->kind & DispTexture) {
                         GXTexCoord1x8(1);
                     }
@@ -591,11 +588,8 @@ static inline HSD_Particle* psDispSubPoint(HSD_Particle* pp)
             GXBegin(GX_POINTS, GX_VTXFMT1, (u16) count);
         }
         for (i = count; i != 0; i--) {
-            f32 z = p->z;
-            f32 y = p->y;
-            f32 x = p->x;
+            GXPosition3f32(p->x, p->y, p->z);
             p++;
-            GXPosition3f32(x, y, z);
             if (pp->kind & DispTexture) {
                 GXTexCoord1x8(1);
             }
@@ -782,6 +776,9 @@ static inline void psDispSubMakePolygon(HSD_Particle* pp, u8* texform, f32 x,
     Vec2 up;
     f32 up_z;
     u8* it = texform;
+    /* The embedded assignments below keep three corner arguments out of the
+     * inline parameter homes, which is how the retail frame counts them. */
+    f32 cx;
 
     right.x = x0;
     right.y = y0;
@@ -934,15 +931,15 @@ static inline void psDispSubMakePolygon(HSD_Particle* pp, u8* texform, f32 x,
             setVtxDesc(1);
             GXBegin(GX_QUADS, GX_VTXFMT1, 4);
         }
-        GXPosition3f32(x - right.x, y - right.y, z - right_z);
+        GXPosition3f32((cx = x - right.x), y - right.y, z - right_z);
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = (pp->kind >> 16) & 0xC;
         }
-        GXPosition3f32(x - up.x, y - up.y, z - up_z);
+        GXPosition3f32((cx = x - up.x), y - up.y, z - up_z);
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 1;
         }
-        GXPosition3f32(x + right.x, y + right.y, z + right_z);
+        GXPosition3f32((cx = x + right.x), y + right.y, z + right_z);
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 2;
         }
@@ -1017,20 +1014,26 @@ static inline bool psMaskAbsGtF32(f32 value, f64 limit)
 /* psDispSub tests its magnitudes through the value helper instead: the retail
  * frame keeps those compare temps one inline level deeper than AppSRT's, after
  * psDispSubMakePolygon's own locals. */
-static inline f32 psAbsF32(f32 value)
-{
-    *(s32*) &value &= 0x7FFFFFFF;
-    return value;
-}
-
 static inline bool psAbsLtF32(f32 value, f32 limit)
 {
-    return psAbsF32(value) < limit;
+    *(s32*) &value &= 0x7FFFFFFF;
+    return value < limit;
 }
 
 static inline bool psAbsGtF32(f32 value, f64 limit)
 {
-    return psAbsF32(value) > limit;
+    *(s32*) &value &= 0x7FFFFFFF;
+    return value > limit;
+}
+
+static inline bool psDispSubAbsLtF32(f32 value, f32 limit)
+{
+    return psAbsLtF32(value, limit);
+}
+
+static inline bool psDispSubAbsGtF32(f32 value, f64 limit)
+{
+    return psAbsGtF32(value, limit);
 }
 
 static inline void psDispSub(HSD_Particle* pp, u8* texform)
@@ -1136,7 +1139,7 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
             y = pvmtx[1][2] * pp->vel.z +
                 (pvmtx[1][0] * pp->vel.x + pvmtx[1][1] * pp->vel.y);
         }
-        if (psAbsLtF32(y, FLT_MIN)) {
+        if (psDispSubAbsLtF32(y, FLT_MIN)) {
             angle = (x >= 0.0f) ? 1.5707964f : -1.5707964f;
         } else {
             angle = atan2f(x, y);
@@ -1147,7 +1150,7 @@ static inline void psDispSub(HSD_Particle* pp, u8* texform)
     } else {
         angle = pp->rotate;
     }
-    if (psAbsGtF32(angle, 0.01)) {
+    if (psDispSubAbsGtF32(angle, 0.01)) {
         Mtx mtx;
         Vec3 axis;
 
@@ -1368,7 +1371,8 @@ static inline void psDispSubAPPSRTPoint(HSD_Particle* pp)
 static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
 {
     Mtx draw_mtx;
-    Vec3 cur_pos;
+    /* Retail keeps a dead 12-byte aggregate at this position. */
+    Vec3 pad;
     Vec3 scratch_scale;
     f32 x_extent;
     f32 y_extent;
@@ -1402,6 +1406,9 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
     f32 prev_pos_x;
     f32 prev_pos_y;
     f32 prev_pos_z;
+    f32 cur_x;
+    f32 cur_y;
+    f32 cur_z;
 
     {
         if (pp->appsrt->frameNum != psFrameNum) {
@@ -1452,25 +1459,19 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
         }
     }
     {
-        f32 app_cur_x;
-        f32 app_cur_y;
-        f32 app_cur_z;
         f32 pos_x;
         f32 pos_y;
 
         PSMTXCopy((MtxPtr) &pp->appsrt->ssx, draw_mtx);
-        app_cur_x = draw_mtx[0][3] + (draw_mtx[0][2] * pp->pos.z +
-                                      (draw_mtx[0][0] * (pos_x = pp->pos.x) +
-                                       draw_mtx[0][1] * (pos_y = pp->pos.y)));
-        app_cur_y = draw_mtx[1][3] +
-                    (draw_mtx[1][2] * pp->pos.z +
-                     (draw_mtx[1][0] * pos_x + draw_mtx[1][1] * pos_y));
-        app_cur_z = draw_mtx[2][3] +
-                    (draw_mtx[2][2] * pp->pos.z +
-                     (draw_mtx[2][0] * pos_x + draw_mtx[2][1] * pos_y));
-        cur_pos.x = app_cur_x;
-        cur_pos.y = app_cur_y;
-        cur_pos.z = app_cur_z;
+        cur_x = draw_mtx[0][3] + (draw_mtx[0][2] * pp->pos.z +
+                                  (draw_mtx[0][0] * (pos_x = pp->pos.x) +
+                                   draw_mtx[0][1] * (pos_y = pp->pos.y)));
+        cur_y = draw_mtx[1][3] +
+                (draw_mtx[1][2] * pp->pos.z +
+                 (draw_mtx[1][0] * pos_x + draw_mtx[1][1] * pos_y));
+        cur_z = draw_mtx[2][3] +
+                (draw_mtx[2][2] * pp->pos.z +
+                 (draw_mtx[2][0] * pos_x + draw_mtx[2][1] * pos_y));
         if (pp->kind & Tornado) {
             f32 x;
             f32 y;
@@ -1502,6 +1503,7 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                                   (draw_mtx[2][0] * dx + draw_mtx[2][1] * dy));
         }
         psScaleAppSRTAxes(pp, draw_mtx);
+        (void) &pad;
     }
     x_extent = pp->appsrt->x94 * pp->size;
     y_extent = pp->appsrt->x98 * pp->size;
@@ -1657,36 +1659,32 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
             GXColor4u8(draw_color.r, draw_color.g, draw_color.b,
                        (u8) ((f32) draw_color.a * pp->trail));
             if (pp->kind & DispTexture) {
-                GXWGFifo.u8 = (pp->kind >> 16) & 0xC;
+                GXTexCoord1x8((pp->kind >> 16) & 0xC);
             }
-            GXWGFifo.f32 = -bx + cur_pos.x;
-            GXWGFifo.f32 = -by + cur_pos.y;
-            GXWGFifo.f32 = cur_pos.z;
+            GXPosition3f32(-bx + cur_x, -by + cur_y, cur_z);
             GXColor4u8(draw_color.r, draw_color.g, draw_color.b, draw_color.a);
             if (pp->kind & DispTexture) {
-                GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 1;
+                GXTexCoord1x8(((pp->kind >> 16) & 0xC) + 1);
             }
-            GXWGFifo.f32 = ax + cur_pos.x;
-            GXWGFifo.f32 = ay + cur_pos.y;
-            GXWGFifo.f32 = cur_pos.z;
+            GXPosition3f32(ax + cur_x, ay + cur_y, cur_z);
             GXColor4u8(draw_color.r, draw_color.g, draw_color.b, draw_color.a);
             if (pp->kind & DispTexture) {
-                GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 2;
+                GXTexCoord1x8(((pp->kind >> 16) & 0xC) + 2);
             }
             GXPosition3f32(bx + prev_pos_x, by + prev_pos_y, prev_pos_z);
             GXColor4u8(draw_color.r, draw_color.g, draw_color.b,
                        (u8) ((f32) draw_color.a * pp->trail));
             if (pp->kind & DispTexture) {
-                GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 3;
+                GXTexCoord1x8(((pp->kind >> 16) & 0xC) + 3);
             }
         } else {
             f32 trail_alpha = 255.0f * (1.0f - pp->trail);
             f32 axis_len = sqrtf(bx * bx + by * by);
 
             if (axis_len != 0.0f) {
-                f32 dx = cur_pos.x - prev_pos_x;
-                f32 dy = cur_pos.y - prev_pos_y;
-                f32 dz = cur_pos.z - prev_pos_z;
+                f32 dx = cur_x - prev_pos_x;
+                f32 dy = cur_y - prev_pos_y;
+                f32 dz = cur_z - prev_pos_z;
                 u32 primitive_count;
 
                 xl = dx * dx;
@@ -1736,9 +1734,8 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                         if (pp->kind & TexFlipT) {
                             t = 1.0f - t;
                         }
-                        GXWGFifo.f32 = cur_pos.x + ax * sx + bx * tx;
-                        GXWGFifo.f32 = cur_pos.y + ay * sx + by * tx;
-                        GXWGFifo.f32 = cur_pos.z;
+                        GXPosition3f32(cur_x + ax * sx + bx * tx,
+                                       cur_y + ay * sx + by * tx, cur_z);
                         GXColor4u8(draw_color.r, draw_color.g, draw_color.b,
                                    (u8) alpha);
                         if (pp->kind & DispTexture) {
@@ -1757,27 +1754,27 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
             setVtxDesc(1);
             GXBegin(GX_QUADS, GX_VTXFMT1, 4U);
         }
-        GXWGFifo.f32 = -ax + cur_pos.x;
-        GXWGFifo.f32 = -ay + cur_pos.y;
-        GXWGFifo.f32 = cur_pos.z;
+        GXWGFifo.f32 = -ax + cur_x;
+        GXWGFifo.f32 = -ay + cur_y;
+        GXWGFifo.f32 = cur_z;
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = (pp->kind >> 16) & 0xC;
         }
-        GXWGFifo.f32 = -bx + cur_pos.x;
-        GXWGFifo.f32 = -by + cur_pos.y;
-        GXWGFifo.f32 = cur_pos.z;
+        GXWGFifo.f32 = -bx + cur_x;
+        GXWGFifo.f32 = -by + cur_y;
+        GXWGFifo.f32 = cur_z;
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 1;
         }
-        GXWGFifo.f32 = ax + cur_pos.x;
-        GXWGFifo.f32 = ay + cur_pos.y;
-        GXWGFifo.f32 = cur_pos.z;
+        GXWGFifo.f32 = ax + cur_x;
+        GXWGFifo.f32 = ay + cur_y;
+        GXWGFifo.f32 = cur_z;
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 2;
         }
-        GXWGFifo.f32 = bx + cur_pos.x;
-        GXWGFifo.f32 = by + cur_pos.y;
-        GXWGFifo.f32 = cur_pos.z;
+        GXWGFifo.f32 = bx + cur_x;
+        GXWGFifo.f32 = by + cur_y;
+        GXWGFifo.f32 = cur_z;
         if (pp->kind & DispTexture) {
             GXWGFifo.u8 = ((pp->kind >> 16) & 0xC) + 3;
         }
@@ -1812,9 +1809,8 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                 if (pp->kind & TexFlipT) {
                     t = 1.0f - t;
                 }
-                GXWGFifo.f32 = cur_pos.x + ax * sx + bx * tx;
-                GXWGFifo.f32 = cur_pos.y + ay * sx + by * tx;
-                GXWGFifo.f32 = cur_pos.z;
+                GXPosition3f32(cur_x + ax * sx + bx * tx,
+                               cur_y + ay * sx + by * tx, cur_z);
                 if (pp->kind & DispTexture) {
                     GXWGFifo.f32 = s;
                     GXWGFifo.f32 = t;
