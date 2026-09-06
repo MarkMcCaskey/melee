@@ -1378,6 +1378,27 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
     f32 by;
     f32 angle;
     u8* it = texform;
+    /* The retail spill band orders the projection coefficients below the
+     * previous-position webs: the perspective and orthographic coefficient
+     * locals are declared here, after the w terms and before prev_pos_*. */
+    f32 w0;
+    f32 w1;
+    f32 w0inv;
+    f32 w1inv;
+    f32 f11;
+    f32 f8;
+    f32 f12;
+    f32 f13;
+    f32 f16;
+    f32 f20;
+    f32 f17;
+    f32 f18;
+    f32 f20b;
+    f32 s7F8;
+    f32 s7FC;
+    f32 s800;
+    f32 s804;
+    f32 s808;
     f32 prev_pos_x;
     f32 prev_pos_y;
     f32 prev_pos_z;
@@ -1515,18 +1536,6 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
             f32 prev_x;
             f32 prev_y;
             f32 prev_z;
-            f32 w0;
-            f32 w1;
-            f32 w0inv;
-            f32 w1inv;
-            f32 f11;
-            f32 f8;
-            f32 f12;
-            f32 f13;
-            f32 f16;
-            f32 f20;
-            f32 s804;
-            f32 s808;
 
             if (pp->kind & Tornado) {
                 calcTornadoLastPos(pp, &prev_x, &prev_y, &prev_z);
@@ -1566,19 +1575,13 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                                 (f12 * pp->pos.x + f8 * pp->pos.y))) -
                 w1inv * (f13 + (f11 * prev_z + (f12 * prev_x + f8 * prev_y)));
         } else {
-            f32 f17;
-            f32 f18;
-            f32 f20;
-            f32 s800;
-            f32 s7FC;
-            f32 s7F8;
 
             s800 = prj[1] * pp->appsrt->ssx + prj[2];
             s7FC = prj[1] * pp->appsrt->ssy + prj[2];
             s7F8 = prj[1] * pp->appsrt->x6C + prj[2];
             f17 = prj[3] * pp->appsrt->x74 + prj[4];
             f18 = prj[3] * pp->appsrt->x78 + prj[4];
-            f20 = prj[3] * pp->appsrt->x7C + prj[4];
+            f20b = prj[3] * pp->appsrt->x7C + prj[4];
             if (pp->kind & Tornado) {
                 f32 tx;
                 f32 ty;
@@ -1593,7 +1596,7 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                     dx = pp->pos.x - tx;
                     dz = pp->pos.z - tz;
                     vf1 = s7F8 * dz + (s800 * dx + s7FC * dy);
-                    vf2 = f20 * dz + (f17 * dx + f18 * dy);
+                    vf2 = f20b * dz + (f17 * dx + f18 * dy);
                 }
             } else {
                 f32 vz;
@@ -1604,7 +1607,7 @@ static inline void psDispSubAppSRT(HSD_Particle* pp, u8* texform)
                 vx = pp->vel.x;
                 vz = pp->vel.z;
                 vf1 = s7F8 * vz + (s800 * vx + s7FC * vy);
-                vf2 = f20 * vz + (f17 * vx + f18 * vy);
+                vf2 = f20b * vz + (f17 * vx + f18 * vy);
             }
         }
         if (psMaskAbsLtF32(vf2, FLT_MIN)) {
