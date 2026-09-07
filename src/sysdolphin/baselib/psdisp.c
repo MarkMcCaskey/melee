@@ -594,6 +594,10 @@ static inline HSD_Particle* psDispSubPoint(HSD_Particle* pp)
                 GXTexCoord1x8(1);
             }
         }
+        /* Keeping the walker alive to the end of the batch is what gives the
+         * flush pointer and `last` their retail registers. */
+        if (q != NULL) {
+        }
     }
     return last;
 }
