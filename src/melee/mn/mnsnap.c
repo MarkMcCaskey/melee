@@ -4,6 +4,7 @@
 
 #include "inlines.h"
 #include "mnmain.h"
+#include <melee/lb/inlines.h>
 #include <melee/lb/lb_00B0.h>
 #include <melee/lb/lbarchive.h>
 #include <melee/lb/lbaudio_ax.h>
@@ -1005,7 +1006,7 @@ void fn_802545C4(void)
     HSD_JObj* jobj2;
     Vec3* translate;
     /* Preserve the original frame; the local stack layout remains unknown. */
-    PAD_STACK(236);
+    PAD_STACK(228);
     buttons = (mn_804A04F0.buttons = mn_80229624(4));
     HSD_JObjAnimAll(mnSnap_804A0A10.select_jobj);
     jobj2 = mnSnap_804A0A10.move_jobj;
@@ -1024,8 +1025,7 @@ void fn_802545C4(void)
                 if ((mnSnap_804A0A10.state == 15) ||
                     (mnSnap_804A0A10.state == 16))
                 {
-                    do {
-                    } while (lbCardNew_CompleteNextTask() == 0xB);
+                    lbCardNew_WaitForTasks();
                 }
                 resetToSlotSelect();
                 return;
@@ -1412,9 +1412,7 @@ void fn_802545C4(void)
                 mnSnap_80254298();
                 result = 1;
             } else {
-                do {
-                    poll_result = lbCardNew_CompleteNextTask();
-                } while (poll_result == 0xB);
+                poll_result = lbCardNew_WaitForTasks();
                 if (poll_result != 0) {
                     mnSnap_80254298();
                     result = 1;
@@ -1634,8 +1632,7 @@ void fn_802545C4(void)
                                              mnSnap_GetCursorIdx(), mi);
                 }
                 if (result != 8) {
-                    do {
-                    } while (lbCardNew_CompleteNextTask() == 0xB);
+                    lbCardNew_WaitForTasks();
                     mnSnap_80253E90(mnSnap_804A0A10.active_slot);
                 }
                 mnSnap_804A0A10.cur_page = -1;
@@ -1903,9 +1900,7 @@ void fn_802545C4(void)
                 mnSnap_80254298();
                 do_delete = 1;
             } else {
-                do {
-                    poll_result = lbCardNew_CompleteNextTask();
-                } while (poll_result == 0xB);
+                poll_result = lbCardNew_WaitForTasks();
                 if (poll_result != 0) {
                     mnSnap_80254298();
                     do_delete = 1;

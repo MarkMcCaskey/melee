@@ -25,4 +25,15 @@ static inline void lbCardGame_SetupArchive(void)
     lbCardGame_SaveChanges();
 }
 
+/// Completes memory card tasks until the card is no longer busy.
+static inline int lbCardNew_WaitForTasks(void)
+{
+    int result;
+
+    do {
+        result = lbCardNew_CompleteNextTask();
+    } while (result == LbCardResult_Busy);
+    return result;
+}
+
 #endif

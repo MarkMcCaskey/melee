@@ -7,6 +7,7 @@
 #include "types.h"
 #include <melee/gm/gm_unsplit.h>
 #include <melee/gm/gmmain_lib.h>
+#include <melee/lb/inlines.h>
 #include <melee/lb/lbaudio_ax.h>
 #include <melee/lb/lbcardgame.h>
 #include <melee/lb/lbcardnew.h>
@@ -1352,16 +1353,6 @@ bool un_8030191C(enum soundtest_callback_arg0 arg0)
     return 0;
 }
 
-static inline s32 waitCardTasks(void)
-{
-    s32 result;
-
-    do {
-        result = lbCardNew_CompleteNextTask();
-    } while (result == 0xB);
-    return result;
-}
-
 bool un_80301964(enum soundtest_callback_arg0 arg0)
 {
     if (arg0 != 1) {
@@ -1371,7 +1362,8 @@ bool un_80301964(enum soundtest_callback_arg0 arg0)
     OSReport(un_803FD28C);
 
     if (lbSnap_8001E058(0, un_804D6E0C) == 0xB) {
-        if (waitCardTasks() == 0 && lbSnap_8001DE8C(un_804D6E04) != 0) {
+        if (lbCardNew_WaitForTasks() == 0 && lbSnap_8001DE8C(un_804D6E04) != 0)
+        {
             HSD_GObj* gobj;
             HSD_SObj* sobj;
 
@@ -1396,7 +1388,7 @@ bool un_80301964(enum soundtest_callback_arg0 arg0)
 static inline void finishSnapTask(s32 result)
 {
     if (result == 0xB) {
-        if (waitCardTasks() == 0) {
+        if (lbCardNew_WaitForTasks() == 0) {
             lbSnap_8001D40C(0);
         }
     }

@@ -1,5 +1,6 @@
 #include "lb_0195.h"
 
+#include "inlines.h"
 #include "lb_0192.h"
 #include "lbaudio_ax.h"
 #include "lbcardgame.h"
@@ -30,7 +31,7 @@ void lb_8001955C(void)
 {
     if (HSD_PadGetResetSwitch()) {
         lbAudioAx_80027DBC();
-        while (lbCardNew_CompleteNextTask() == 11);
+        lbCardNew_WaitForTasks();
         VISetPostRetraceCallback(0);
         VISetPreRetraceCallback(0);
         VISetBlack(1);

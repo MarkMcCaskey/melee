@@ -7,6 +7,7 @@
 #include "types.h"
 #include <dolphin/vi.h>
 #include <melee/db/db.h>
+#include <melee/lb/inlines.h>
 #include <melee/lb/lb_00B0.h>
 #include <melee/lb/lbaudio_ax.h>
 #include <melee/lb/lbcardgame.h>
@@ -205,12 +206,12 @@ void gm_801A4014(GameMode* mode)
         }
     }
     lb_8001CDB4();
-    lbCardNew_CompleteAllTasks(11);
+    lbCardNew_CompleteAllTasks(LbCardResult_Busy);
     lbMthp_8001F800();
     if (gmMainLib_8046B0F0.resetting) {
         lbAudioAx_80027DBC();
         HSD_PadReset();
-        while (lbCardNew_CompleteNextTask() == 11);
+        lbCardNew_WaitForTasks();
         if (DVDCheckDisk() == 0) {
             OSResetSystem(1, 0, 0);
         }
