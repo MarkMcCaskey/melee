@@ -2354,7 +2354,7 @@ HSD_GObj* fn_801901F8(HSD_CObjDesc* cobjdesc)
     return gobj;
 }
 
-void fn_8019027C(UNK_T lights)
+void fn_8019027C(LightList** lights)
 {
     HSD_GObj* gobj = GObj_Create(0xB, 0x1A, 0);
     HSD_LObj* lobj = lb_80011AC4(lights);
