@@ -96,10 +96,11 @@ struct HSD_ShapeSetDesc {
     u16 nb_shape;
     s32 nb_vertex_index;
     HSD_VtxDescList* vertex_desc;
-    u8** vertex_idx_list;
+    /// Average-mode tables repeat the last pointer in an extra slot.
+    u8** vertex_idx_list DAT_COUNT(nb_shape + 1);
     s32 nb_normal_index;
     HSD_VtxDescList* normal_desc;
-    u8** normal_idx_list;
+    u8** normal_idx_list DAT_COUNT(nb_shape + 1);
 };
 
 struct HSD_ShapeAnim {
